@@ -1,24 +1,60 @@
+from agp import AGP
 from car import Car
-from AGP import AGP
-import numpy as np
 
+import pygame
+from pygame.locals import *
+import sys
+
+BLUE  = (0, 0, 255)
+RED   = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
+
+FPS = 60
+FramePerSec = pygame.time.Clock()
 
 class PathSimulation:
-    def __init__(self, n, dt):
-        self.agp = AGP(12500, dt)
-        for i in range(n):
-            car = Car(props={'pref-speed': np.random.normal(90, 20, 1)[0]})
-            self.agp.add_car(car)
-        self.t = 0
+    def __init__(self, n):
+        # Initialize pygame
+        pygame.init()
+        # Setting up the main display
+        self.DISPLAYSURF = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+        self.DISPLAYSURF.fill(BLACK)
+        pygame.display.set_caption("Traffic simulation")
 
-    def randomize_start(self):
-        for car in self.agp.cars:
-            car.set_prefspeed(np.random.normal(90, 10, 1)[0])
+        # Create cars
+        self.cars = pygame.sprite.Group()
+        for i in range(n):
+            car = Car()
+            self.cars.add(car)
+
+        # Create AGP
+        self.agp = AGP(1250, 0.1)
 
     def run(self):
-        while len(self.agp.active_cars(self.cars)) > 0:
-            self.agp.update(self.dt)
-            self.t += self.dt
+        # Game loop: runs until quit event (X button)
+        while True:
+            # Quit event 
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+        
+            # Set background color
+            self.DISPLAYSURF.fill(BLACK)
 
-    def plot(self):
-        self.agp.plot()
+            # Draw and update AGP
+            self.agp.draw(self.DISPLAYSURF)
+
+            # Draw and update cars
+            for car in self.cars:
+                car.update(self.agp, self.cars)
+                car.draw(self.DISPLAYSURF)
+
+            # Update display
+            pygame.display.update()
+            FramePerSec.tick(FPS)

@@ -1,5 +1,5 @@
 # Agent-based model simulation for travel times in Buenos Aires city
-We developed an agent-based model simulation to understand the dynamics of the transport system and variations in travel times  under different policies in Buenos Aires city.
+We developed an agent-based model simulation to understand the dynamics of the transport system and the variations in travel times  under different policies in Buenos Aires city.
 
 ### Introduction
 

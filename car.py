@@ -1,20 +1,63 @@
 import numpy as np
+import pygame
+from pygame.locals import *
 
-class Car:
+class Car(pygame.sprite.Sprite):
     def __init__(self, 
-                 pos=np.array([0.,0.]), 
-                 vel=np.array([0.,0.]), 
+                 pos=np.array([0., 420.]), 
+                 vel=np.array([1.,0.]), 
                  acc=np.array([0.,0.]), 
                  props={'pref-speed': np.random.normal(90, 10, 1)[0], 'mistake-p': 0.1, 'reaction-time': 0.2}):
-        # Position
-        self.pos = pos
+        super().__init__() 
+
+        # Load image, scale and rotate
+        scale_factor = 0.05
+        self.image = pygame.image.load("./images/car.png")
+        self.image = pygame.transform.scale(self.image, (444*scale_factor, 800*scale_factor))
+        self.image = pygame.transform.rotate(self.image, 90)
+
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+        # # Position
+        # self.pos = pos
         # Velocity/Acceleration vectors
         self.vel = vel
         self.acc = acc        
-        # Reaction time
+        # # Reaction time
         self.active = True
         # Properties of agent
         self.props = props
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)  
+
+    def update(self, agp, cars):
+        # Update position and velocity
+        if self.active:
+            self.rect.move_ip(self.vel[0], self.vel[1])
+            self.vel += self.acc
+
+        # Check if car collided
+        self.collision(cars)
+
+        # Check if arrived at destination
+        # If so, save stats and remove from simulation
+        if self.rect.left > 1100:
+            self.save_stats()
+            self.active = False
+            self.kill()
+
+    def save_stats(self):
+        pass
+
+    def collision(self, cars):
+        # To be run if collision occurs between 2 cars
+        # Create a temporary copy of the group without the current car
+        temp_group = cars.copy()
+        temp_group.remove(self)
+        if pygame.sprite.spritecollideany(self, temp_group):
+            print("Collision!")
 
     def is_active(self):
         return self.active
@@ -25,18 +68,9 @@ class Car:
     def get_vel(self):
         return self.vel
     
-    def set_prefspeed(self, speed):
+    def set_pref_speed(self, speed):
         self.props['pref-speed'] = speed
-
-    def update_dynamics(self, dt):
-        if self.active:
-            # self.vel += self.acc * dt + (np.random.normal(0, 0.1, 1)*self.vel)
-            self.vel += self.acc * dt
-            self.pos[0] += self.vel[0] * dt
-
-        if self.pos[0] > 12000:
-            self.active = False
-
+    
     def acc_rate(self):
         if self.vel[0] > 120 or self.vel[0] < 5:
             return 0.05
