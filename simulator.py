@@ -17,12 +17,15 @@ SCREEN_HEIGHT = 800
 FPS = 60
 clock = pygame.time.Clock()
 
+# np.random.seed(42)
+
 class PathSimulation:
     def __init__(self):
         # Initialize pygame
         pygame.init()
         self.start = pygame.time.get_ticks()
         self.spawn_timer = 0
+        self.running = True
 
         # Setting up the main display
         self.DISPLAYSURF = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
@@ -44,44 +47,50 @@ class PathSimulation:
     # Game loop: runs until quit event (X button)
     def run(self):
         while True:
-            # Set background color
-            self.DISPLAYSURF.fill(BLACK)
+            # Check for events
+            self.event_handler()
 
-            # Draw and update AGP
-            self.agp.draw(self.DISPLAYSURF)
+            if self.running:
 
-            # Draw and update cars
-            for car in self.cars:
-                car.update(self.agp, self.cars)
-                car.draw(self.DISPLAYSURF)
+                # Set background color
+                self.DISPLAYSURF.fill(BLACK)
 
-            # Generate cars
-            current_time = (pygame.time.get_ticks() - self.start)/1000
-            if self.spawn_timer <= current_time:
-                self.cars.add(Car())
-                self.spawn_timer += self.poisson_process()
+                # Draw and update AGP
+                self.agp.draw(self.DISPLAYSURF)
+
+                # Draw and update cars
+                for car in self.cars:
+                    car.update_state(self.agp, self.cars)
+                    car.draw(self.DISPLAYSURF)
+
+                # Generate cars
+                current_time = (pygame.time.get_ticks() - self.start)/1000
+                if self.spawn_timer <= current_time and len(self.cars) < 10:
+                    new_car = Car()
+                    print(f"New car with pref speed: {new_car.pref_speed}")
+                    if new_car.collision(self.cars):
+                        self.spawn_timer += 0.05
+                        print("Collision!")
+                        continue
+                    self.cars.add(new_car)
+                    self.spawn_timer += self.poisson_process()
+
+                # # Render and display lambda value
+                # text_surface = self.font.render(f"Lambda: {self.lambda_poisson():.2f}", True, (255, 255, 255))
+                # self.DISPLAYSURF.blit(text_surface, (50, 80))
 
 
-            # Render and display lambda value
-            text_surface = self.font.render(f"Lambda: {self.lambda_poisson():.2f}", True, (255, 255, 255))
-            self.DISPLAYSURF.blit(text_surface, (50, 80))
-
-
-            # Quit event 
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            # Update display
-            pygame.display.update()
-            clock.tick(FPS)
+                # Update display
+                pygame.display.update()
+                clock.tick(FPS)
 
 
     # Poisson process that models the cars arriving at the AGP
     def poisson_process(self):
         # Tasa de llegada de autos (λ)
-        lambda_ = self.lambda_poisson()
+        # Lambda esta fijo ahora pero podriamos ajustar a los datos
+        # lambda_ = self.lambda_poisson()
+        lambda_ = 0.5
 
         # Generar una lista de tiempos en los que llegan los autos
         tiempos_llegada = np.random.exponential(1 / lambda_)
@@ -94,7 +103,17 @@ class PathSimulation:
     def lambda_poisson(self) -> float:
         # Load dataset
         df = pd.read_csv('./data/distribution.csv')
-        current_time = (pygame.time.get_ticks() - self.start)/1000
-        hora = int(current_time/3) + 6
-        return (df['CANTIDAD'][hora] / 3600) 
+        return (df['CANTIDAD'] / 3600) 
+    
+
+    def event_handler(self):
+        # Quit event 
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    self.running = not self.running
         
