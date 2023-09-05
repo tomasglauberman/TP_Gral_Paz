@@ -4,16 +4,16 @@ from pygame.locals import *
 
 class Car(pygame.sprite.Sprite):
     def __init__(self, 
-                 pos=np.array([0., 420.]), 
+                 pos=np.array([-50, 420.]), 
                  vel=np.array([1.,0.]), 
                  acc=np.array([0.,0.]), 
                  props={'pref-speed': np.random.normal(90, 10, 1)[0], 'mistake-p': 0.1, 'reaction-time': 0.2}):
         super().__init__() 
 
+        pos = pos + (0 if np.random.uniform() > 0.5 else 30)
         # Load image, scale and rotate
-        scale_factor = 0.05
         self.image = pygame.image.load("./images/car.png")
-        self.image = pygame.transform.scale(self.image, (444*scale_factor, 800*scale_factor))
+        self.image = pygame.transform.scale(self.image, (22.2, 40))
         self.image = pygame.transform.rotate(self.image, 90)
 
         self.rect = self.image.get_rect()

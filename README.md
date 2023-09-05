@@ -1,7 +1,5 @@
 # Agent-based model simulation for travel times in Buenos Aires city
-We developed an agent-based model simulation to understand the dynamics of the transport system and the variations in travel times  under different policies in Buenos Aires city.
-
-### Introduction
+We developed an agent-based model simulation to understand the dynamics of the transport system and quantify the variations in travel time  under different policies in Buenos Aires city.
 
 A typical agent-based model has three elements:
 
@@ -9,20 +7,16 @@ A typical agent-based model has three elements:
 2. A set of agent *relationships* and methods of interaction.
 3. An *environment* in which agents interact (with the env and other agents).
 
-#### Essential characteristics of an agent:
-- Self-contained
-- Autonomous
-- Stateful
-- Social dynamic
-
-### Initial model definition
- We aim to determine the distribution of travel time over a 12km segment and experiment how the distribution changes with different rules for the environment, such as speed limits and weather conditions.
+## Initial model definition
+ We aim to determine the distribution of travel time over a 12km segment of road and experiment how the distribution changes with different rules for the environment, such as speed limits and weather conditions.
  
+
+### Agents
 Agents are cars in our model (or people driving cars).   
   
 *Static attributes:*
-- **Prefered-speed**: the speed at which the agent prefers to move.
-- **Mistake-p**: the probability of making a mistake at any given time. The higher the value, the higher the risk of accident. There should be some more complex relationship between the probabilty of having an accident, Mistake-p and Prefered-speed. 
+- **Prefered-speed**: the speed at which the agent prefers to travel.
+- **Mistake-p**: the probability of making a mistake at any given time. The higher the value, the higher the risk of accident. (There should be some more complex relationship between the probabilty of having an accident, Mistake-p and Prefered-speed) 
 - **Reaction-time**: time it takes for an agent to respond. This value must be around the same for all agents (or it might change based on visibility or capacity of each agent).  
 
 *Dynamic attributes:* 
@@ -43,6 +37,9 @@ Agents have to drive from one point to another under the following basic behavio
 2. Sense surroundings to check on neighbours with probability $(1- \text{Mistake-p})$. 
 
 ---
+
+### Interactions
+
 5. How do the agents interact with each other? With the
 environment? How expansive or focused are agent
 interactions?
@@ -52,3 +49,5 @@ behaviours, for such a model?
 
 7. How might you validate the model, especially the agent
 behaviours?
+
+### Environment

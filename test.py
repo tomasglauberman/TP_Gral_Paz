@@ -1,6 +1,6 @@
 from simulator import PathSimulation
 
 # Create simulation
-sim = PathSimulation(1)
+sim = PathSimulation()
 # Run simulation
 sim.run()
