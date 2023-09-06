@@ -11,7 +11,7 @@ GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-SCREEN_WIDTH = 1200
+SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 800
 
 FPS = 60
@@ -20,7 +20,7 @@ clock = pygame.time.Clock()
 # np.random.seed(42)
 
 class PathSimulation:
-    def __init__(self):
+    def __init__(self, dt):
         # Initialize pygame
         pygame.init()
         self.start = pygame.time.get_ticks()
@@ -35,13 +35,14 @@ class PathSimulation:
         # Create cars group. Groups are useful to 
         # update and draw all sprites at once as well as
         # check for collisions
-        self.cars = pygame.sprite.Group()
+        self.cars = []
 
         # Create AGP
-        self.agp = AGP(1250, 0.1)
+        self.agp = AGP(1400, 0.1)
 
-
+        self.i = 0
         self.font = pygame.font.Font(None, 36)
+        self.dt = dt
 
 
     # Game loop: runs until quit event (X button)
@@ -60,20 +61,19 @@ class PathSimulation:
 
                 # Draw and update cars
                 for car in self.cars:
-                    car.update_state(self.agp, self.cars)
+                    car.update_state(self.agp, self.cars, self.dt)
                     car.draw(self.DISPLAYSURF)
 
                 # Generate cars
                 current_time = (pygame.time.get_ticks() - self.start)/1000
-                if self.spawn_timer <= current_time and len(self.cars) < 10:
-                    new_car = Car()
-                    print(f"New car with pref speed: {new_car.pref_speed}")
-                    if new_car.collision(self.cars):
+                if self.spawn_timer <= current_time:
+                    new_car = Car(self.i)
+                    if not new_car.collision(self.cars):
+                        self.cars.append(new_car)
+                        self.spawn_timer += self.poisson_process()
+                        self.i += 1
+                    else:
                         self.spawn_timer += 0.05
-                        print("Collision!")
-                        continue
-                    self.cars.add(new_car)
-                    self.spawn_timer += self.poisson_process()
 
                 # # Render and display lambda value
                 # text_surface = self.font.render(f"Lambda: {self.lambda_poisson():.2f}", True, (255, 255, 255))
@@ -90,7 +90,7 @@ class PathSimulation:
         # Tasa de llegada de autos (λ)
         # Lambda esta fijo ahora pero podriamos ajustar a los datos
         # lambda_ = self.lambda_poisson()
-        lambda_ = 0.5
+        lambda_ = 3*self.dt
 
         # Generar una lista de tiempos en los que llegan los autos
         tiempos_llegada = np.random.exponential(1 / lambda_)
